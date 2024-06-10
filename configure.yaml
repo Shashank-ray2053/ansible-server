@@ -1,0 +1,57 @@
+- name: Hosting Dynamic Website From Ansible
+  hosts: dev
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Update && upgrade
+      apt:
+        update_cache: yes
+        cache_valid_time: 86400
+
+    - name: Install Git
+      apt:
+        name: git
+        state: present
+
+    - name: Clone the repository
+      git:
+        repo: "https://github.com/soocrates/Node_React_CRUD.git"
+        dest: /home/ubuntu/Node_React_CRUD
+        version: main
+
+    - name: install nodejs
+      apt:
+        name: nodejs
+        state: present
+
+    - name: install npm
+      apt:
+        name: npm
+        state: present
+
+    - name: install pm2
+      npm:
+        name: pm2
+        global: yes
+        state: present
+
+    - name: install frontend dependensis
+      command: npm install
+      args:
+        chdir: /home/ubuntu/Node_React_CRUD/frontend
+
+    - name: install backend dependensis
+      command: npm install
+      args:
+        chdir: /home/ubuntu/Node_React_CRUD/backend
+
+    - name: run the frontend server using pm2
+      command: pm2 start npm --name frontend -- run dev
+      args:
+        chdir: /home/ubuntu/Node_React_CRUD/frontend
+
+    - name: run the backend server using pm2
+      command: pm2 start npm --name backend -- start
+      args:
+        chdir: /home/ubuntu/Node_React_CRUD/backend
